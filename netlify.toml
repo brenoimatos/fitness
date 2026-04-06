@@ -1,9 +1,11 @@
 [build]
   publish = "."
   command = ""
+  base = ""
 
 [build.environment]
   NODE_VERSION = "20"
+  NODE_ENV = "production"
 
 [[headers]]
   for = "/sw.js"
