@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>FitnessFAQs — Hybrid Programs</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#cc0000" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <!-- iOS Safari PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="FFQs Hybrid" />
+  <link rel="apple-touch-icon" href="icons/icon-152x152.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192x192.png" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+      background: #111;
+      color: #eee;
+      min-height: 100vh;
+      /* iOS safe area */
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    header {
+      background: #000;
+      padding: 14px 20px;
+      padding-top: calc(14px + env(safe-area-inset-top));
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 3px solid #e00;
+    }
+
+    header h1 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    header h1 span { color: #e00; font-style: italic; }
+
+    .controls {
+      background: #1a1a1a;
+      padding: 12px 16px;
+      display: flex;
+      gap: 10px;
+      flex-direction: column;
+      border-bottom: 1px solid #333;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .controls-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .controls label {
+      font-size: 0.7rem;
+      color: #777;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .control-group { display: flex; flex-direction: column; }
+
+    select {
+      background: #2a2a2a;
+      border: 1px solid #444;
+      color: #eee;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      min-width: 130px;
+    }
+    select:focus { border-color: #e00; }
+
+    .program-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .tab-btn {
+      background: #2a2a2a;
+      border: 1px solid #444;
+      color: #ccc;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .tab-btn.active {
+      background: #e00;
+      border-color: #e00;
+      color: #fff;
+    }
+    .tab-btn:active { opacity: 0.7; }
+
+    .main {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .day-block {
+      background: #1c1c1c;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      border: 1px solid #2a2a2a;
+    }
+
+    .day-title {
+      background: #e00;
+      padding: 10px 16px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .exercise-list { list-style: none; }
+
+    .exercise-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      border-bottom: 1px solid #252525;
+      min-height: 60px;
+    }
+    .exercise-item:last-child { border-bottom: none; }
+    .exercise-item:active { background: #222; }
+
+    .exercise-img {
+      width: 70px;
+      height: 52px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #2a2a2a;
+      flex-shrink: 0;
+      border: 1px solid #333;
+    }
+
+    .exercise-info { flex: 1; min-width: 0; }
+
+    .exercise-name {
+      font-weight: 600;
+      font-size: 0.92rem;
+      color: #f0f0f0;
+      line-height: 1.2;
+    }
+
+    .exercise-meta {
+      display: flex;
+      gap: 10px;
+      margin-top: 5px;
+      flex-wrap: wrap;
+    }
+
+    .meta-badge {
+      font-size: 0.72rem;
+      color: #777;
+      background: #252525;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+    .meta-badge span { color: #ddd; font-weight: 700; }
+
+    .error-notice {
+      background: #2a1c1c;
+      border: 1px solid #4a2a2a;
+      color: #a66;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 0.83rem;
+    }
+
+    .img-fallback {
+      width: 70px;
+      height: 52px;
+      border-radius: 8px;
+      background: #2a2a2a;
+      border: 1px solid #333;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+
+    @media (max-width: 400px) {
+      .exercise-img, .img-fallback { width: 58px; height: 44px; }
+      .exercise-name { font-size: 0.85rem; }
+    }
+
+    /* ── Weight tracking ─────────────────────────────── */
+    .exercise-item {
+      flex-direction: column;
+      align-items: stretch;
+      padding: 12px 16px;
+      gap: 0;
+    }
+    .exercise-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .exercise-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .history-btn {
+      background: none;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+      color: #666;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .history-btn:active { color: #e00; }
+
+    .sets-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .set-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .set-label {
+      font-size: 0.65rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+    .set-input {
+      width: 100%;
+      background: #242424;
+      border: 1px solid #383838;
+      border-radius: 8px;
+      color: #eee;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-align: center;
+      padding: 7px 4px;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .set-input:focus {
+      border-color: #e00;
+      background: #2c1414;
+    }
+    .set-input.has-value {
+      border-color: #444;
+      color: #fff;
+    }
+    .set-input::placeholder { color: #444; font-weight: 400; }
+    .set-unit {
+      font-size: 0.6rem;
+      color: #555;
+      margin-top: 1px;
+    }
+
+    /* ── History modal ───────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 1000;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #1c1c1c;
+      border-radius: 16px 16px 0 0;
+      width: 100%;
+      max-width: 600px;
+      max-height: 75vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid #333;
+    }
+    .modal-title {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .modal-close {
+      background: #2a2a2a;
+      border: none;
+      color: #aaa;
+      font-size: 1.1rem;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-body {
+      overflow-y: auto;
+      padding: 16px 20px;
+      flex: 1;
+    }
+    .modal-empty {
+      color: #666;
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 24px 0;
+    }
+
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .history-table th {
+      color: #777;
+      font-weight: 600;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 6px 8px;
+      text-align: left;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    .history-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #222;
+      color: #ddd;
+      vertical-align: top;
+    }
+    .history-table tr:last-child td { border-bottom: none; }
+    .history-table td.date-cell {
+      color: #888;
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+    .history-table td.weight-cell {
+      font-weight: 700;
+      color: #fff;
+    }
+    .set-weights-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .set-weight-chip {
+      background: #2a2a2a;
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 0.82rem;
+      color: #ccc;
+    }
+    .set-weight-chip .chip-label {
+      color: #666;
+      font-size: 0.7rem;
+      margin-right: 3px;
+    }
+
+    /* Date selector */
+    .date-input {
+      background: #2a2a2a;
+      border: 1px solid #444;
+      color: #eee;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+      -webkit-appearance: none;
+      color-scheme: dark;
+    }
+    .date-input:focus { border-color: #e00; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>FITNESS<span>FAQs</span> — Hybrid Programs</h1>
+</header>
+
+<div class="controls">
+  <div class="controls-row">
+    <div class="control-group">
+      <label>Program</label>
+      <div class="program-tabs" id="programTabs"></div>
+    </div>
+  </div>
+  <div class="controls-row">
+    <div class="control-group">
+      <label>Week</label>
+      <select id="weekSelect"></select>
+    </div>
+    <div class="control-group">
+      <label>Date</label>
+      <input type="date" class="date-input" id="dateInput" />
+    </div>
+  </div>
+</div>
+
+<div class="main" id="main"></div>
+
+<!-- History modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle"></span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ─── WORKOUT DATA ────────────────────────────────────────────────────────────
+
+const programs = {
+  "Full Body": {
+    weeks: {
+      "Week 1": [
+        { day: "Day 1 – Full Body #1", exercises: [
+          { name: "Romanian Deadlift", sets: 3, reps: "6-8", rest: "3-4" },
+          { name: "Overhead Press",    sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Pull-Up",           sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Push-Up",           sets: 3, reps: "8-12", rest: "2-3" },
+          { name: "Sissy Squat",       sets: 3, reps: "8-15", rest: "2" },
+          { name: "Band Rear Delt Fly",sets: 3, reps: "15-20",rest: "2" },
+          { name: "Incline Bicep Curl",sets: 3, reps: "8-12", rest: "2" },
+        ]},
+        { day: "Day 2 – Full Body #2", exercises: [
+          { name: "Vertical Push-Up",  sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "DB Pullover",       sets: 3, reps: "8-12", rest: "2-3" },
+          { name: "Lunge",             sets: 3, reps: "12-15",rest: "2" },
+          { name: "Larsen Bench Press",sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "DB Row",            sets: 3, reps: "10-12",rest: "3-4" },
+          { name: "DB Chest Fly",      sets: 3, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "10-12",rest: "2" },
+          { name: "BW Tricep Extension",sets:3, reps: "10-15",rest: "2" },
+        ]},
+        { day: "Day 3 – Full Body #3", exercises: [
+          { name: "Squat",             sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "Dip",               sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Chin-Up",           sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Nordic Curl",       sets: 3, reps: "8-12", rest: "2-3" },
+          { name: "BW Row",            sets: 3, reps: "8-15", rest: "2-3" },
+          { name: "DB Lateral Raise",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "10-12",rest: "2" },
+          { name: "Ring Bicep Curl",   sets: 3, reps: "12-15",rest: "2" },
+        ]},
+        { day: "Day 4 – Full Body #4", exercises: [
+          { name: "Pendlay Row",       sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "Incline Bench Press",sets:3, reps: "8-12", rest: "3-4" },
+          { name: "Neutral Pull-Up",   sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Push-Up",           sets: 3, reps: "8-12", rest: "2-3" },
+          { name: "Back Extension",    sets: 3, reps: "10-20",rest: "2-3" },
+          { name: "Lu Lateral Raise",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Skull Crusher",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Rear Delt Fly",  sets: 3, reps: "15-20",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "10-12",rest: "2" },
+        ]},
+      ],
+      "Week 2": [
+        { day: "Day 1 – Full Body #1", exercises: [
+          { name: "Romanian Deadlift", sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "Overhead Press",    sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Pull-Up",           sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Push-Up",           sets: 3, reps: "8-12", rest: "2-3" },
+          { name: "Sissy Squat",       sets: 3, reps: "8-15", rest: "2" },
+          { name: "Band Rear Delt Fly",sets: 3, reps: "15-20",rest: "2" },
+          { name: "Incline Bicep Curl",sets: 3, reps: "8-12", rest: "2" },
+        ]},
+        { day: "Day 2 – Full Body #2", exercises: [
+          { name: "Vertical Push-Up",  sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "DB Pullover",       sets: 3, reps: "8-12", rest: "2-3" },
+          { name: "Lunge",             sets: 3, reps: "12-15",rest: "2" },
+          { name: "Larsen Bench Press",sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "DB Row",            sets: 3, reps: "10-12",rest: "3-4" },
+          { name: "DB Chest Fly",      sets: 3, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "10-12",rest: "2" },
+          { name: "BW Tricep Extension",sets:3, reps: "10-15",rest: "2" },
+        ]},
+        { day: "Day 3 – Full Body #3", exercises: [
+          { name: "Squat",             sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "Dip",               sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Chin-Up",           sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Nordic Curl",       sets: 3, reps: "8-12", rest: "2-3" },
+          { name: "BW Row",            sets: 3, reps: "8-15", rest: "2-3" },
+          { name: "DB Lateral Raise",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "10-12",rest: "2" },
+          { name: "Ring Bicep Curl",   sets: 3, reps: "12-15",rest: "2" },
+        ]},
+        { day: "Day 4 – Full Body #4", exercises: [
+          { name: "Pendlay Row",       sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "Incline Bench Press",sets:3, reps: "8-12", rest: "3-4" },
+          { name: "Neutral Pull-Up",   sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Push-Up",           sets: 3, reps: "8-12", rest: "2-3" },
+          { name: "Back Extension",    sets: 3, reps: "10-20",rest: "2-3" },
+          { name: "Lu Lateral Raise",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Skull Crusher",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Rear Delt Fly",  sets: 3, reps: "15-20",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "10-12",rest: "2" },
+        ]},
+      ],
+      "Week 3": [
+        { day: "Day 1 – Full Body #1", exercises: [
+          { name: "Romanian Deadlift", sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "Overhead Press",    sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Pull-Up",           sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Push-Up",           sets: 3, reps: "8-12", rest: "2-3" },
+          { name: "Sissy Squat",       sets: 3, reps: "8-15", rest: "2" },
+          { name: "Band Rear Delt Fly",sets: 3, reps: "15-20",rest: "2" },
+          { name: "Incline Bicep Curl",sets: 3, reps: "8-12", rest: "2" },
+        ]},
+        { day: "Day 2 – Full Body #2", exercises: [
+          { name: "Vertical Push-Up",  sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "DB Pullover",       sets: 3, reps: "8-12", rest: "2-3" },
+          { name: "Lunge",             sets: 3, reps: "12-15",rest: "2" },
+          { name: "Larsen Bench Press",sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "DB Row",            sets: 3, reps: "10-12",rest: "3-4" },
+          { name: "DB Chest Fly",      sets: 3, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 4, reps: "10-12",rest: "2" },
+          { name: "BW Tricep Extension",sets:3, reps: "10-15",rest: "2" },
+        ]},
+        { day: "Day 3 – Full Body #3", exercises: [
+          { name: "Squat",             sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "Dip",               sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Chin-Up",           sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Nordic Curl",       sets: 3, reps: "8-12", rest: "2-3" },
+          { name: "BW Row",            sets: 3, reps: "8-15", rest: "2-3" },
+          { name: "DB Lateral Raise",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 4, reps: "10-12",rest: "2" },
+          { name: "Ring Bicep Curl",   sets: 3, reps: "12-15",rest: "2" },
+        ]},
+        { day: "Day 4 – Full Body #4", exercises: [
+          { name: "Pendlay Row",       sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "Incline Bench Press",sets:3, reps: "8-12", rest: "3-4" },
+          { name: "Neutral Pull-Up",   sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Push-Up",           sets: 3, reps: "8-12", rest: "2-3" },
+          { name: "Back Extension",    sets: 3, reps: "10-20",rest: "2-3" },
+          { name: "Lu Lateral Raise",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Skull Crusher",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Rear Delt Fly",  sets: 3, reps: "15-20",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "10-12",rest: "2" },
+        ]},
+      ],
+      "Week 4": [
+        { day: "Day 1 – Full Body #1", exercises: [
+          { name: "Romanian Deadlift", sets: 4, reps: "6-8",  rest: "3-4" },
+          { name: "Overhead Press",    sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Pull-Up",           sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Push-Up",           sets: 3, reps: "8-12", rest: "2-3" },
+          { name: "Sissy Squat",       sets: 3, reps: "8-15", rest: "2" },
+          { name: "Band Rear Delt Fly",sets: 3, reps: "15-20",rest: "2" },
+          { name: "Incline Bicep Curl",sets: 3, reps: "8-12", rest: "2" },
+        ]},
+        { day: "Day 2 – Full Body #2", exercises: [
+          { name: "Vertical Push-Up",  sets: 4, reps: "6-8",  rest: "3-4" },
+          { name: "DB Pullover",       sets: 3, reps: "8-12", rest: "2-3" },
+          { name: "Lunge",             sets: 3, reps: "12-15",rest: "2" },
+          { name: "Larsen Bench Press",sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "DB Row",            sets: 3, reps: "10-12",rest: "3-4" },
+          { name: "DB Chest Fly",      sets: 3, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 4, reps: "10-12",rest: "2" },
+          { name: "BW Tricep Extension",sets:3, reps: "10-15",rest: "2" },
+        ]},
+        { day: "Day 3 – Full Body #3", exercises: [
+          { name: "Squat",             sets: 4, reps: "6-8",  rest: "3-4" },
+          { name: "Dip",               sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Chin-Up",           sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Nordic Curl",       sets: 3, reps: "8-12", rest: "2-3" },
+          { name: "BW Row",            sets: 3, reps: "8-15", rest: "2-3" },
+          { name: "DB Lateral Raise",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 4, reps: "10-12",rest: "2" },
+          { name: "Ring Bicep Curl",   sets: 3, reps: "12-15",rest: "2" },
+        ]},
+        { day: "Day 4 – Full Body #4", exercises: [
+          { name: "Pendlay Row",       sets: 4, reps: "6-8",  rest: "3-4" },
+          { name: "Incline Bench Press",sets:3, reps: "8-12", rest: "3-4" },
+          { name: "Neutral Pull-Up",   sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Push-Up",           sets: 3, reps: "8-12", rest: "2-3" },
+          { name: "Back Extension",    sets: 3, reps: "10-20",rest: "2-3" },
+          { name: "Lu Lateral Raise",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Skull Crusher",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Rear Delt Fly",  sets: 3, reps: "15-20",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "10-12",rest: "2" },
+        ]},
+      ],
+      "Week 5": [
+        { day: "Day 1 – Full Body #1", exercises: [
+          { name: "Good Morning",      sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Dip",               sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Pull-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Larsen Bench Press",sets: 3, reps: "8-12", rest: "2-3" },
+          { name: "Reverse Nordic",    sets: 3, reps: "8-12", rest: "2" },
+          { name: "Ring Rear Delt Fly",sets: 3, reps: "12-15",rest: "2" },
+          { name: "BB Braced Curl",    sets: 3, reps: "8-12", rest: "2" },
+        ]},
+        { day: "Day 2 – Full Body #2", exercises: [
+          { name: "Vertical Push-Up",  sets: 4, reps: "6-8",  rest: "3-4" },
+          { name: "BW Pullover",       sets: 3, reps: "5-8",  rest: "2-3" },
+          { name: "Split Squat",       sets: 3, reps: "15-20",rest: "2" },
+          { name: "Push-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "DB Row",            sets: 3, reps: "12-15",rest: "3-4" },
+          { name: "Ring Chest Fly",    sets: 3, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "12-20",rest: "2" },
+          { name: "DB Skull Crusher",  sets: 3, reps: "12-15",rest: "2" },
+        ]},
+        { day: "Day 3 – Full Body #3", exercises: [
+          { name: "Squat",             sets: 4, reps: "6-8",  rest: "3-4" },
+          { name: "Overhead Press",    sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Chin-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Bodyweight Hamstring Curl",sets:3,reps:"8-12",rest:"2-3"},
+          { name: "BW Row",            sets: 3, reps: "8-15", rest: "2-3" },
+          { name: "Band Lateral Raise",sets: 3, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "12-20",rest: "2" },
+          { name: "DB Spider Curl",    sets: 3, reps: "10-15",rest: "2" },
+        ]},
+        { day: "Day 4 – Full Body #4", exercises: [
+          { name: "Pendlay Row",       sets: 4, reps: "6-8",  rest: "3-4" },
+          { name: "Push-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Neutral Pull-Up",   sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Incline Bench Press",sets:3, reps: "8-12", rest: "2-3" },
+          { name: "Reverse Hyper",     sets: 3, reps: "12-15",rest: "2-3" },
+          { name: "DB Tricep Kickback",sets: 3, reps: "10-12",rest: "2" },
+          { name: "DB Lateral Raise",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Rear Delt Fly",  sets: 2, reps: "20-30",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "10-12",rest: "2" },
+        ]},
+      ],
+      "Week 6": [
+        { day: "Day 1 – Full Body #1", exercises: [
+          { name: "Good Morning",      sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Dip",               sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Pull-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Larsen Bench Press",sets: 3, reps: "8-12", rest: "2-3" },
+          { name: "Reverse Nordic",    sets: 3, reps: "8-12", rest: "2" },
+          { name: "Ring Rear Delt Fly",sets: 3, reps: "12-15",rest: "2" },
+          { name: "BB Braced Curl",    sets: 3, reps: "8-12", rest: "2" },
+        ]},
+        { day: "Day 2 – Full Body #2", exercises: [
+          { name: "Vertical Push-Up",  sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "BW Pullover",       sets: 3, reps: "5-8",  rest: "2-3" },
+          { name: "Split Squat",       sets: 3, reps: "15-20",rest: "2" },
+          { name: "Push-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "DB Row",            sets: 3, reps: "12-15",rest: "3-4" },
+          { name: "Ring Chest Fly",    sets: 3, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "12-20",rest: "2" },
+          { name: "DB Skull Crusher",  sets: 3, reps: "12-15",rest: "2" },
+        ]},
+        { day: "Day 3 – Full Body #3", exercises: [
+          { name: "Squat",             sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Overhead Press",    sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Chin-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Bodyweight Hamstring Curl",sets:3,reps:"8-12",rest:"2-3"},
+          { name: "BW Row",            sets: 3, reps: "8-15", rest: "2-3" },
+          { name: "Band Lateral Raise",sets: 3, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "12-20",rest: "2" },
+          { name: "DB Spider Curl",    sets: 3, reps: "10-15",rest: "2" },
+        ]},
+        { day: "Day 4 – Full Body #4", exercises: [
+          { name: "Pendlay Row",       sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Push-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Neutral Pull-Up",   sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Incline Bench Press",sets:3, reps: "8-12", rest: "2-3" },
+          { name: "Reverse Hyper",     sets: 3, reps: "12-15",rest: "2-3" },
+          { name: "DB Tricep Kickback",sets: 3, reps: "10-12",rest: "2" },
+          { name: "DB Lateral Raise",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Rear Delt Fly",  sets: 2, reps: "20-30",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "10-12",rest: "2" },
+        ]},
+      ],
+      "Week 7": [
+        { day: "Day 1 – Full Body #1", exercises: [
+          { name: "Good Morning",      sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Dip",               sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Pull-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Larsen Bench Press",sets: 3, reps: "8-12", rest: "2-3" },
+          { name: "Reverse Nordic",    sets: 3, reps: "8-12", rest: "2" },
+          { name: "Ring Rear Delt Fly",sets: 3, reps: "12-15",rest: "2" },
+          { name: "BB Braced Curl",    sets: 3, reps: "8-12", rest: "2" },
+        ]},
+        { day: "Day 2 – Full Body #2", exercises: [
+          { name: "Vertical Push-Up",  sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "BW Pullover",       sets: 3, reps: "5-8",  rest: "2-3" },
+          { name: "Split Squat",       sets: 3, reps: "15-20",rest: "2" },
+          { name: "Push-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "DB Row",            sets: 3, reps: "12-15",rest: "3-4" },
+          { name: "Ring Chest Fly",    sets: 3, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 4, reps: "12-20",rest: "2" },
+          { name: "DB Skull Crusher",  sets: 3, reps: "12-15",rest: "2" },
+        ]},
+        { day: "Day 3 – Full Body #3", exercises: [
+          { name: "Squat",             sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Overhead Press",    sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Chin-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Bodyweight Hamstring Curl",sets:3,reps:"8-12",rest:"2-3"},
+          { name: "BW Row",            sets: 3, reps: "8-15", rest: "2-3" },
+          { name: "Band Lateral Raise",sets: 3, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 4, reps: "12-20",rest: "2" },
+          { name: "DB Spider Curl",    sets: 3, reps: "10-15",rest: "2" },
+        ]},
+        { day: "Day 4 – Full Body #4", exercises: [
+          { name: "Pendlay Row",       sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Push-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Neutral Pull-Up",   sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Incline Bench Press",sets:3, reps: "8-12", rest: "2-3" },
+          { name: "Reverse Hyper",     sets: 3, reps: "12-15",rest: "2-3" },
+          { name: "DB Tricep Kickback",sets: 3, reps: "10-12",rest: "2" },
+          { name: "DB Lateral Raise",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Rear Delt Fly",  sets: 2, reps: "20-30",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "10-12",rest: "2" },
+        ]},
+      ],
+      "Week 8": [
+        { day: "Day 1 – Full Body #1", exercises: [
+          { name: "Good Morning",      sets: 4, reps: "8-10", rest: "3-4" },
+          { name: "Dip",               sets: 4, reps: "8-12", rest: "3-4" },
+          { name: "Pull-Up",           sets: 4, reps: "8-12", rest: "3-4" },
+          { name: "Larsen Bench Press",sets: 4, reps: "8-12", rest: "2-3" },
+          { name: "Reverse Nordic",    sets: 3, reps: "8-12", rest: "2" },
+          { name: "Ring Rear Delt Fly",sets: 3, reps: "12-15",rest: "2" },
+          { name: "BB Braced Curl",    sets: 3, reps: "8-12", rest: "2" },
+        ]},
+        { day: "Day 2 – Full Body #2", exercises: [
+          { name: "Vertical Push-Up",  sets: 4, reps: "8-12", rest: "3-4" },
+          { name: "BW Pullover",       sets: 4, reps: "5-8",  rest: "2-3" },
+          { name: "Split Squat",       sets: 3, reps: "15-20",rest: "2" },
+          { name: "Push-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "DB Row",            sets: 3, reps: "15-20",rest: "3-4" },
+          { name: "Ring Chest Fly",    sets: 3, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 4, reps: "12-20",rest: "2" },
+          { name: "DB Skull Crusher",  sets: 3, reps: "12-15",rest: "2" },
+        ]},
+        { day: "Day 3 – Full Body #3", exercises: [
+          { name: "Squat",             sets: 4, reps: "8-12", rest: "3-4" },
+          { name: "Overhead Press",    sets: 4, reps: "8-10", rest: "3-4" },
+          { name: "Chin-Up",           sets: 4, reps: "8-12", rest: "3-4" },
+          { name: "Bodyweight Hamstring Curl",sets:3,reps:"8-12",rest:"2-3"},
+          { name: "BW Row",            sets: 4, reps: "8-15", rest: "2-3" },
+          { name: "Band Lateral Raise",sets: 3, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 4, reps: "12-20",rest: "2" },
+          { name: "DB Spider Curl",    sets: 3, reps: "10-15",rest: "2" },
+        ]},
+        { day: "Day 4 – Full Body #4", exercises: [
+          { name: "Pendlay Row",       sets: 4, reps: "8-12", rest: "3-4" },
+          { name: "Push-Up",           sets: 4, reps: "8-12", rest: "3-4" },
+          { name: "Neutral Pull-Up",   sets: 4, reps: "8-12", rest: "3-4" },
+          { name: "Incline Bench Press",sets:4, reps: "8-12", rest: "2-3" },
+          { name: "Reverse Hyper",     sets: 3, reps: "15-20",rest: "2-3" },
+          { name: "DB Tricep Kickback",sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Lateral Raise",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Rear Delt Fly",  sets: 3, reps: "20-30",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "10-12",rest: "2" },
+        ]},
+      ],
+      "Deload": [
+        { day: "Day 1 – Full Body #1", exercises: [
+          { name: "Romanian Deadlift", sets: 2, reps: "6-8",  rest: "3-4" },
+          { name: "Overhead Press",    sets: 2, reps: "8-10", rest: "3-4" },
+          { name: "Pull-Up",           sets: 2, reps: "8-10", rest: "3-4" },
+          { name: "Push-Up",           sets: 2, reps: "8-12", rest: "2-3" },
+          { name: "Sissy Squat",       sets: 2, reps: "8-15", rest: "2" },
+          { name: "Band Rear Delt Fly",sets: 2, reps: "15-20",rest: "2" },
+          { name: "Incline Bicep Curl",sets: 2, reps: "8-12", rest: "2" },
+        ]},
+        { day: "Day 2 – Full Body #2", exercises: [
+          { name: "Vertical Push-Up",  sets: 2, reps: "6-8",  rest: "3-4" },
+          { name: "DB Pullover",       sets: 2, reps: "8-12", rest: "2-3" },
+          { name: "Lunge",             sets: 2, reps: "12-15",rest: "2" },
+          { name: "Larsen Bench Press",sets: 2, reps: "8-12", rest: "3-4" },
+          { name: "DB Row",            sets: 2, reps: "10-12",rest: "3-4" },
+          { name: "DB Chest Fly",      sets: 2, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 2, reps: "10-12",rest: "2" },
+          { name: "BW Tricep Extension",sets:2, reps: "10-15",rest: "2" },
+        ]},
+        { day: "Day 3 – Full Body #3", exercises: [
+          { name: "Squat",             sets: 2, reps: "6-8",  rest: "3-4" },
+          { name: "Dip",               sets: 2, reps: "8-10", rest: "3-4" },
+          { name: "Chin-Up",           sets: 2, reps: "8-10", rest: "3-4" },
+          { name: "Nordic Curl",       sets: 2, reps: "8-12", rest: "2-3" },
+          { name: "BW Row",            sets: 2, reps: "8-15", rest: "2-3" },
+          { name: "DB Lateral Raise",  sets: 2, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 2, reps: "10-12",rest: "2" },
+          { name: "Ring Bicep Curl",   sets: 2, reps: "12-15",rest: "2" },
+        ]},
+        { day: "Day 4 – Full Body #4", exercises: [
+          { name: "Pendlay Row",       sets: 2, reps: "6-8",  rest: "3-4" },
+          { name: "Incline Bench Press",sets:2, reps: "8-12", rest: "3-4" },
+          { name: "Neutral Pull-Up",   sets: 2, reps: "8-10", rest: "3-4" },
+          { name: "Push-Up",           sets: 2, reps: "8-12", rest: "2-3" },
+          { name: "Back Extension",    sets: 2, reps: "10-20",rest: "2-3" },
+          { name: "Lu Lateral Raise",  sets: 2, reps: "12-15",rest: "2" },
+          { name: "DB Skull Crusher",  sets: 2, reps: "12-15",rest: "2" },
+          { name: "DB Rear Delt Fly",  sets: 2, reps: "15-20",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "10-12",rest: "2" },
+        ]},
+      ],
+    }
+  },
+
+  "Push/Pull/Legs": {
+    weeks: {
+      "Week 1": [
+        { day: "Day 1 – Pull #1", exercises: [
+          { name: "Pull-Up",           sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "Pendlay Row",       sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "DB Pullover",       sets: 3, reps: "8-12", rest: "2" },
+          { name: "DB Rear Delt Fly",  sets: 3, reps: "15-20",rest: "2" },
+          { name: "Ring Pelican Curl", sets: 3, reps: "8-10", rest: "2" },
+          { name: "DB Spider Curl",    sets: 3, reps: "10-15",rest: "2" },
+        ]},
+        { day: "Day 2 – Push #1", exercises: [
+          { name: "Overhead Press",    sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "Dip",               sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Larsen Bench Press",sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "DB Chest Fly",      sets: 3, reps: "12-15",rest: "2" },
+          { name: "BW Tricep Extension",sets:3, reps: "10-15",rest: "2" },
+          { name: "DB Lateral Raise",  sets: 3, reps: "12-15",rest: "2" },
+        ]},
+        { day: "Day 3 – Legs #1", exercises: [
+          { name: "Squat",             sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "Romanian Deadlift", sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Hip Thrust",        sets: 3, reps: "10-15",rest: "2-3" },
+          { name: "Lunge",             sets: 2, reps: "10-15",rest: "2-3" },
+          { name: "Nordic Curl",       sets: 3, reps: "8-12", rest: "2" },
+          { name: "Band Leg Extension",sets: 3, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "10-12",rest: "2" },
+        ]},
+        { day: "Day 4 – Pull #2", exercises: [
+          { name: "Chin-Up",           sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "BW Row",            sets: 3, reps: "8-15", rest: "2-3" },
+          { name: "DB Row",            sets: 3, reps: "12-15",rest: "2-3" },
+          { name: "Band Pullover",     sets: 3, reps: "12-15",rest: "2" },
+          { name: "Ring Rear Delt Fly",sets: 3, reps: "12-15",rest: "2" },
+          { name: "BB Braced Curl",    sets: 3, reps: "8-12", rest: "2" },
+          { name: "DB Hammer Curl",    sets: 3, reps: "10-15",rest: "2" },
+        ]},
+        { day: "Day 5 – Push #2", exercises: [
+          { name: "Vertical Push-Up",  sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "Push-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Incline Bench Press",sets:3, reps: "8-12", rest: "3-4" },
+          { name: "Ring Chest Fly",    sets: 3, reps: "12-15",rest: "2" },
+          { name: "Band Lateral Raise",sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Tricep Kickback",sets: 3, reps: "10-12",rest: "2" },
+        ]},
+        { day: "Day 6 – Legs #2", exercises: [
+          { name: "Single Leg Squat",  sets: 3, reps: "6-8",  rest: "2-3" },
+          { name: "Squat",             sets: 2, reps: "12-15",rest: "3-4" },
+          { name: "Back Extension",    sets: 3, reps: "10-20",rest: "2-3" },
+          { name: "Band Hamstring Curl",sets:3, reps: "12-15",rest: "2" },
+          { name: "Sissy Squat",       sets: 3, reps: "8-12", rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "10-12",rest: "2" },
+        ]},
+      ],
+      "Week 2": [
+        { day: "Day 1 – Pull #1", exercises: [
+          { name: "Pull-Up",           sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "Pendlay Row",       sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "DB Pullover",       sets: 3, reps: "8-12", rest: "2" },
+          { name: "DB Rear Delt Fly",  sets: 3, reps: "15-20",rest: "2" },
+          { name: "Ring Pelican Curl", sets: 3, reps: "8-10", rest: "2" },
+          { name: "DB Spider Curl",    sets: 3, reps: "10-15",rest: "2" },
+        ]},
+        { day: "Day 2 – Push #1", exercises: [
+          { name: "Overhead Press",    sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "Dip",               sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Larsen Bench Press",sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "DB Chest Fly",      sets: 3, reps: "12-15",rest: "2" },
+          { name: "BW Tricep Extension",sets:3, reps: "10-15",rest: "2" },
+          { name: "DB Lateral Raise",  sets: 3, reps: "12-15",rest: "2" },
+        ]},
+        { day: "Day 3 – Legs #1", exercises: [
+          { name: "Squat",             sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "Romanian Deadlift", sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Hip Thrust",        sets: 3, reps: "10-15",rest: "2-3" },
+          { name: "Lunge",             sets: 2, reps: "10-15",rest: "2-3" },
+          { name: "Nordic Curl",       sets: 3, reps: "8-12", rest: "2" },
+          { name: "Band Leg Extension",sets: 3, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "10-12",rest: "2" },
+        ]},
+        { day: "Day 4 – Pull #2", exercises: [
+          { name: "Chin-Up",           sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "BW Row",            sets: 3, reps: "8-15", rest: "2-3" },
+          { name: "DB Row",            sets: 3, reps: "12-15",rest: "2-3" },
+          { name: "Band Pullover",     sets: 3, reps: "12-15",rest: "2" },
+          { name: "Ring Rear Delt Fly",sets: 3, reps: "12-15",rest: "2" },
+          { name: "BB Braced Curl",    sets: 3, reps: "8-12", rest: "2" },
+          { name: "DB Hammer Curl",    sets: 3, reps: "10-15",rest: "2" },
+        ]},
+        { day: "Day 5 – Push #2", exercises: [
+          { name: "Vertical Push-Up",  sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "Push-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Incline Bench Press",sets:3, reps: "8-12", rest: "3-4" },
+          { name: "Ring Chest Fly",    sets: 3, reps: "12-15",rest: "2" },
+          { name: "Band Lateral Raise",sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Tricep Kickback",sets: 3, reps: "10-12",rest: "2" },
+        ]},
+        { day: "Day 6 – Legs #2", exercises: [
+          { name: "Single Leg Squat",  sets: 3, reps: "6-8",  rest: "2-3" },
+          { name: "Squat",             sets: 2, reps: "12-15",rest: "3-4" },
+          { name: "Back Extension",    sets: 3, reps: "10-20",rest: "2-3" },
+          { name: "Band Hamstring Curl",sets:3, reps: "12-15",rest: "2" },
+          { name: "Sissy Squat",       sets: 3, reps: "8-12", rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "10-12",rest: "2" },
+        ]},
+      ],
+      "Week 5": [
+        { day: "Day 1 – Pull #1", exercises: [
+          { name: "BW Pullover",       sets: 3, reps: "5-8",  rest: "3-4" },
+          { name: "Pull-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Pendlay Row",       sets: 3, reps: "10-15",rest: "3-4" },
+          { name: "Band Rear Delt Fly",sets: 3, reps: "15-20",rest: "2" },
+          { name: "Incline Bicep Curl",sets: 3, reps: "8-12", rest: "2" },
+          { name: "Ring Bicep Curl",   sets: 3, reps: "12-15",rest: "2" },
+        ]},
+        { day: "Day 2 – Push #1", exercises: [
+          { name: "Vertical Push-Up",  sets: 4, reps: "6-8",  rest: "3-4" },
+          { name: "Dip",               sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Larsen Bench Press",sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "DB Chest Fly",      sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Skull Crusher",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "Lu Lateral Raise",  sets: 3, reps: "12-15",rest: "2" },
+        ]},
+        { day: "Day 3 – Legs #1", exercises: [
+          { name: "Good Morning",      sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Squat",             sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Hip Thrust",        sets: 3, reps: "10-15",rest: "2-3" },
+          { name: "Split Squat",       sets: 2, reps: "15-20",rest: "2-3" },
+          { name: "Nordic Curl",       sets: 3, reps: "8-12", rest: "2" },
+          { name: "Band Leg Extension",sets: 3, reps: "15-20",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "12-20",rest: "2" },
+        ]},
+        { day: "Day 4 – Pull #2", exercises: [
+          { name: "Chin-Up",           sets: 4, reps: "6-8",  rest: "3-4" },
+          { name: "DB Row",            sets: 3, reps: "12-15",rest: "3-4" },
+          { name: "BW Row",            sets: 3, reps: "8-15", rest: "2-3" },
+          { name: "Band Pullover",     sets: 3, reps: "15-20",rest: "2-3" },
+          { name: "Ring Rear Delt Fly",sets: 3, reps: "12-15",rest: "2" },
+          { name: "BB Braced Curl",    sets: 3, reps: "8-12", rest: "2" },
+          { name: "DB Hammer Curl",    sets: 3, reps: "10-15",rest: "2" },
+        ]},
+        { day: "Day 5 – Push #2", exercises: [
+          { name: "Overhead Press",    sets: 4, reps: "6-8",  rest: "3-4" },
+          { name: "Dip",               sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Push-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "BW Tricep Extension",sets:3, reps: "10-15",rest: "2" },
+          { name: "DB Lateral Raise",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Tricep Kickback",sets: 3, reps: "12-15",rest: "2" },
+        ]},
+        { day: "Day 6 – Legs #2", exercises: [
+          { name: "Single Leg Squat",  sets: 4, reps: "6-8",  rest: "2-3" },
+          { name: "Squat",             sets: 3, reps: "10-12",rest: "3-4" },
+          { name: "Reverse Hyper",     sets: 3, reps: "12-15",rest: "2-3" },
+          { name: "BW Hamstring Curl", sets: 3, reps: "8-12", rest: "2" },
+          { name: "Reverse Nordic",    sets: 3, reps: "8-12", rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "12-20",rest: "2" },
+        ]},
+      ],
+      "Deload": [
+        { day: "Day 1 – Pull #1", exercises: [
+          { name: "Pull-Up",           sets: 2, reps: "6-8",  rest: "3-4" },
+          { name: "Pendlay Row",       sets: 2, reps: "8-10", rest: "3-4" },
+          { name: "DB Pullover",       sets: 2, reps: "8-12", rest: "2" },
+          { name: "DB Rear Delt Fly",  sets: 2, reps: "15-20",rest: "2" },
+          { name: "Ring Pelican Curl", sets: 2, reps: "8-10", rest: "2" },
+          { name: "DB Spider Curl",    sets: 2, reps: "10-15",rest: "2" },
+        ]},
+        { day: "Day 2 – Push #1", exercises: [
+          { name: "Overhead Press",    sets: 2, reps: "6-8",  rest: "3-4" },
+          { name: "Dip",               sets: 2, reps: "8-10", rest: "3-4" },
+          { name: "Larsen Bench Press",sets: 2, reps: "8-12", rest: "3-4" },
+          { name: "DB Chest Fly",      sets: 2, reps: "12-15",rest: "2" },
+          { name: "BW Tricep Extension",sets:2, reps: "10-15",rest: "2" },
+          { name: "DB Lateral Raise",  sets: 2, reps: "12-15",rest: "2" },
+        ]},
+        { day: "Day 3 – Legs #1", exercises: [
+          { name: "Squat",             sets: 2, reps: "6-8",  rest: "3-4" },
+          { name: "Romanian Deadlift", sets: 2, reps: "8-10", rest: "3-4" },
+          { name: "Hip Thrust",        sets: 2, reps: "10-15",rest: "2-3" },
+          { name: "Lunge",             sets: 2, reps: "10-15",rest: "2-3" },
+          { name: "Nordic Curl",       sets: 2, reps: "8-12", rest: "2" },
+          { name: "Band Leg Extension",sets: 2, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 2, reps: "10-12",rest: "2" },
+        ]},
+        { day: "Day 4 – Pull #2", exercises: [
+          { name: "Chin-Up",           sets: 2, reps: "6-8",  rest: "3-4" },
+          { name: "BW Row",            sets: 2, reps: "8-15", rest: "2-3" },
+          { name: "DB Row",            sets: 2, reps: "12-15",rest: "2-3" },
+          { name: "Band Pullover",     sets: 2, reps: "12-15",rest: "2" },
+          { name: "Ring Rear Delt Fly",sets: 2, reps: "12-15",rest: "2" },
+          { name: "BB Braced Curl",    sets: 2, reps: "8-12", rest: "2" },
+          { name: "DB Hammer Curl",    sets: 2, reps: "10-15",rest: "2" },
+        ]},
+        { day: "Day 5 – Push #2", exercises: [
+          { name: "Vertical Push-Up",  sets: 2, reps: "6-8",  rest: "3-4" },
+          { name: "Push-Up",           sets: 2, reps: "8-12", rest: "3-4" },
+          { name: "Incline Bench Press",sets:2, reps: "8-12", rest: "3-4" },
+          { name: "Ring Chest Fly",    sets: 2, reps: "12-15",rest: "2" },
+          { name: "Band Lateral Raise",sets: 2, reps: "12-15",rest: "2" },
+          { name: "DB Tricep Kickback",sets: 2, reps: "10-12",rest: "2" },
+        ]},
+        { day: "Day 6 – Legs #2", exercises: [
+          { name: "Single Leg Squat",  sets: 2, reps: "6-8",  rest: "2-3" },
+          { name: "Squat",             sets: 2, reps: "12-15",rest: "3-4" },
+          { name: "Back Extension",    sets: 2, reps: "10-20",rest: "2-3" },
+          { name: "Band Hamstring Curl",sets:2, reps: "12-15",rest: "2" },
+          { name: "Sissy Squat",       sets: 2, reps: "8-12", rest: "2" },
+          { name: "Calf Raise",        sets: 2, reps: "10-12",rest: "2" },
+        ]},
+      ],
+    }
+  },
+
+  "Upper/Lower": {
+    weeks: {
+      "Week 1": [
+        { day: "Day 1 – Upper #1", exercises: [
+          { name: "Vertical Push-Up",  sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "Pull-Up",           sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Larsen Bench Press",sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Pendlay Row",       sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Ring Chest Fly",    sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Tricep Kickback",sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Lateral Raise",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "BB Braced Curl",    sets: 3, reps: "8-12", rest: "2" },
+        ]},
+        { day: "Day 2 – Lower #1", exercises: [
+          { name: "Single Leg Squat",  sets: 3, reps: "6-8",  rest: "2-3" },
+          { name: "Squat",             sets: 2, reps: "12-15",rest: "3-4" },
+          { name: "Back Extension",    sets: 3, reps: "10-20",rest: "2-3" },
+          { name: "Lunge",             sets: 3, reps: "12-15",rest: "2-3" },
+          { name: "BW Hamstring Curl", sets: 3, reps: "8-12", rest: "2" },
+          { name: "Sissy Squat",       sets: 3, reps: "8-15", rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "10-12",rest: "2" },
+        ]},
+        { day: "Day 3 – Upper #2", exercises: [
+          { name: "Overhead Press",    sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "Chin-Up",           sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Dip",               sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "DB Row",            sets: 3, reps: "10-12",rest: "2-3" },
+          { name: "Push-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Ring Pelican Curl", sets: 3, reps: "8-10", rest: "2" },
+          { name: "BW Tricep Extension",sets:3, reps: "10-15",rest: "2" },
+          { name: "Band Rear Delt Fly",sets: 3, reps: "15-20",rest: "2" },
+          { name: "DB Lateral Raise",  sets: 3, reps: "12-15",rest: "2" },
+        ]},
+        { day: "Day 4 – Lower #2", exercises: [
+          { name: "Romanian Deadlift", sets: 3, reps: "6-8",  rest: "3-4" },
+          { name: "Split Squat",       sets: 3, reps: "15-20",rest: "2-3" },
+          { name: "Reverse Hyper",     sets: 3, reps: "12-15",rest: "2-3" },
+          { name: "Reverse Nordic",    sets: 3, reps: "8-12", rest: "2" },
+          { name: "Hip Thrust",        sets: 3, reps: "10-15",rest: "2-3" },
+          { name: "Nordic Curl",       sets: 3, reps: "8-12", rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "10-12",rest: "2" },
+        ]},
+      ],
+      "Week 5": [
+        { day: "Day 1 – Upper #1", exercises: [
+          { name: "Dip",               sets: 4, reps: "6-8",  rest: "3-4" },
+          { name: "Pull-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Larsen Bench Press",sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "BW Row",            sets: 3, reps: "8-15", rest: "2-3" },
+          { name: "Push-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Lu Lateral Raise",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Skull Crusher",  sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Spider Curl",    sets: 3, reps: "10-15",rest: "2" },
+        ]},
+        { day: "Day 2 – Lower #1", exercises: [
+          { name: "Squat",             sets: 4, reps: "6-8",  rest: "3-4" },
+          { name: "Single Leg Squat",  sets: 3, reps: "8-12", rest: "2-3" },
+          { name: "Back Extension",    sets: 3, reps: "10-20",rest: "2-3" },
+          { name: "Split Squat",       sets: 3, reps: "15-20",rest: "2-3" },
+          { name: "Band Hamstring Curl",sets:3, reps: "12-15",rest: "2" },
+          { name: "Band Leg Extension",sets: 3, reps: "12-15",rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "12-20",rest: "2" },
+        ]},
+        { day: "Day 3 – Upper #2", exercises: [
+          { name: "Vertical Push-Up",  sets: 4, reps: "6-8",  rest: "3-4" },
+          { name: "Chin-Up",           sets: 3, reps: "8-12", rest: "3-4" },
+          { name: "Dip",               sets: 3, reps: "10-15",rest: "3-4" },
+          { name: "Pendlay Row",       sets: 3, reps: "10-15",rest: "3-4" },
+          { name: "Incline Bench Press",sets:3, reps: "8-12", rest: "3-4" },
+          { name: "Incline Bicep Curl",sets: 3, reps: "8-12", rest: "2" },
+          { name: "DB Chest Fly",      sets: 3, reps: "12-15",rest: "2" },
+          { name: "Band Lateral Raise",sets: 3, reps: "12-15",rest: "2" },
+          { name: "DB Rear Delt Fly",  sets: 3, reps: "15-20",rest: "2" },
+        ]},
+        { day: "Day 4 – Lower #2", exercises: [
+          { name: "Good Morning",      sets: 3, reps: "8-10", rest: "3-4" },
+          { name: "Squat",             sets: 3, reps: "10-12",rest: "3-4" },
+          { name: "Lunge",             sets: 3, reps: "12-15",rest: "2-3" },
+          { name: "Sissy Squat",       sets: 3, reps: "8-15", rest: "2" },
+          { name: "Hip Thrust",        sets: 3, reps: "10-15",rest: "2-3" },
+          { name: "Nordic Curl",       sets: 3, reps: "8-12", rest: "2" },
+          { name: "Calf Raise",        sets: 3, reps: "12-20",rest: "2" },
+        ]},
+      ],
+      "Deload": [
+        { day: "Day 1 – Upper #1", exercises: [
+          { name: "Vertical Push-Up",  sets: 2, reps: "6-8",  rest: "3-4" },
+          { name: "Pull-Up",           sets: 2, reps: "8-10", rest: "3-4" },
+          { name: "Larsen Bench Press",sets: 2, reps: "8-10", rest: "3-4" },
+          { name: "Pendlay Row",       sets: 2, reps: "8-10", rest: "3-4" },
+          { name: "Ring Chest Fly",    sets: 2, reps: "12-15",rest: "2" },
+          { name: "DB Tricep Kickback",sets: 2, reps: "12-15",rest: "2" },
+          { name: "DB Lateral Raise",  sets: 2, reps: "12-15",rest: "2" },
+          { name: "BB Braced Curl",    sets: 2, reps: "8-12", rest: "2" },
+        ]},
+        { day: "Day 2 – Lower #1", exercises: [
+          { name: "Single Leg Squat",  sets: 2, reps: "6-8",  rest: "2-3" },
+          { name: "Squat",             sets: 2, reps: "12-15",rest: "3-4" },
+          { name: "Back Extension",    sets: 2, reps: "10-20",rest: "2-3" },
+          { name: "Lunge",             sets: 2, reps: "12-15",rest: "2-3" },
+          { name: "BW Hamstring Curl", sets: 2, reps: "8-12", rest: "2" },
+          { name: "Sissy Squat",       sets: 2, reps: "8-15", rest: "2" },
+          { name: "Calf Raise",        sets: 2, reps: "10-12",rest: "2" },
+        ]},
+        { day: "Day 3 – Upper #2", exercises: [
+          { name: "Overhead Press",    sets: 2, reps: "6-8",  rest: "3-4" },
+          { name: "Chin-Up",           sets: 2, reps: "8-10", rest: "3-4" },
+          { name: "Dip",               sets: 2, reps: "8-10", rest: "3-4" },
+          { name: "DB Row",            sets: 2, reps: "10-12",rest: "2-3" },
+          { name: "Push-Up",           sets: 2, reps: "8-12", rest: "3-4" },
+          { name: "Ring Pelican Curl", sets: 2, reps: "8-10", rest: "2" },
+          { name: "BW Tricep Extension",sets:2, reps: "10-15",rest: "2" },
+          { name: "Band Rear Delt Fly",sets: 2, reps: "15-20",rest: "2" },
+          { name: "DB Lateral Raise",  sets: 2, reps: "12-15",rest: "2" },
+        ]},
+        { day: "Day 4 – Lower #2", exercises: [
+          { name: "Romanian Deadlift", sets: 2, reps: "6-8",  rest: "3-4" },
+          { name: "Split Squat",       sets: 2, reps: "15-20",rest: "2-3" },
+          { name: "Reverse Hyper",     sets: 2, reps: "12-15",rest: "2-3" },
+          { name: "Reverse Nordic",    sets: 2, reps: "8-12", rest: "2" },
+          { name: "Hip Thrust",        sets: 2, reps: "10-15",rest: "2-3" },
+          { name: "Nordic Curl",       sets: 2, reps: "8-12", rest: "2" },
+          { name: "Calf Raise",        sets: 2, reps: "10-12",rest: "2" },
+        ]},
+      ],
+    }
+  }
+};
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let currentProgram = "Full Body";
+let currentWeek    = null;
+let currentDate    = todayStr();
+let exerciseImages = {};
+let imagesLoaded   = false;
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function formatDate(dateStr) {
+  const [y, m, d] = dateStr.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+// ─── STORAGE ──────────────────────────────────────────────────────────────────
+// Key is just the exercise name — shared across all programs and weeks.
+// Each date entry stores { weights, prog, week } so history retains context.
+//
+// Schema: { "Romanian Deadlift": { "2026-04-06": { weights:[80,82,85], prog:"Full Body", week:"Week 3" } } }
+
+const STORAGE_KEY = 'ffqs_logs';
+
+function getLogs() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+  catch { return {}; }
+}
+
+function saveLogs(logs) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+}
+
+// Get saved weights for an exercise on the current date.
+function getWeights(exerciseName, numSets) {
+  const logs = getLogs();
+  const dateEntry = (logs[exerciseName] || {})[currentDate];
+  const saved = dateEntry ? (dateEntry.weights || []) : [];
+  const arr = [...saved];
+  while (arr.length < numSets) arr.push('');
+  return arr.slice(0, numSets);
+}
+
+// Save weight for one set of an exercise on the current date.
+function saveWeight(exerciseName, setIndex, value) {
+  const logs = getLogs();
+  if (!logs[exerciseName]) logs[exerciseName] = {};
+  if (!logs[exerciseName][currentDate]) {
+    logs[exerciseName][currentDate] = { weights: [], prog: currentProgram, week: currentWeek };
+  }
+  const entry = logs[exerciseName][currentDate];
+  entry.prog = currentProgram;
+  entry.week = currentWeek;
+  while (entry.weights.length <= setIndex) entry.weights.push('');
+  entry.weights[setIndex] = value;
+  // trim trailing empty slots
+  while (entry.weights.length && entry.weights[entry.weights.length - 1] === '') entry.weights.pop();
+  if (!entry.weights.length) delete logs[exerciseName][currentDate];
+  saveLogs(logs);
+}
+
+// Get all logged sessions for an exercise across all dates/weeks/programs.
+function getHistory(exerciseName) {
+  const logs = getLogs();
+  return Object.entries(logs[exerciseName] || {})
+    .map(([date, entry]) => ({
+      date,
+      prog:    entry.prog    || '—',
+      week:    entry.week    || '—',
+      weights: entry.weights || [],
+    }))
+    .filter(e => e.weights.some(w => w !== '' && w != null))
+    .sort((a, b) => a.date.localeCompare(b.date)); // ascending for chart
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+async function loadImages() {
+  try {
+    const res = await fetch('exercises-images.json');
+    if (!res.ok) throw new Error('not found');
+    exerciseImages = await res.json();
+    imagesLoaded = true;
+  } catch {
+    imagesLoaded = false;
+  }
+}
+
+function buildControls() {
+  const tabs = document.getElementById('programTabs');
+  tabs.innerHTML = '';
+  for (const prog of Object.keys(programs)) {
+    const btn = document.createElement('button');
+    btn.textContent = prog;
+    btn.className = 'tab-btn' + (prog === currentProgram ? ' active' : '');
+    btn.onclick = () => { currentProgram = prog; currentWeek = null; buildControls(); render(); };
+    tabs.appendChild(btn);
+  }
+
+  const weeks = Object.keys(programs[currentProgram].weeks);
+  if (!currentWeek || !weeks.includes(currentWeek)) currentWeek = weeks[0];
+
+  const sel = document.getElementById('weekSelect');
+  sel.innerHTML = '';
+  for (const w of weeks) {
+    const opt = document.createElement('option');
+    opt.value = w; opt.textContent = w;
+    if (w === currentWeek) opt.selected = true;
+    sel.appendChild(opt);
+  }
+  sel.onchange = () => { currentWeek = sel.value; render(); };
+
+  const dateInput = document.getElementById('dateInput');
+  dateInput.value = currentDate;
+  dateInput.onchange = () => { currentDate = dateInput.value; render(); };
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function getImage(name) {
+  return imagesLoaded ? (exerciseImages[name] || null) : null;
+}
+
+function renderExercise(ex) {
+  const imgUrl = getImage(ex.name);
+  const imgHtml = imgUrl
+    ? `<img class="exercise-img" src="${imgUrl}" alt="${ex.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+    : '';
+  const fallback = `<div class="img-fallback" ${imgUrl ? 'style="display:none"' : ''}>💪</div>`;
+
+  const weights = getWeights(ex.name, ex.sets);
+
+  const setsHtml = Array.from({ length: ex.sets }, (_, i) => {
+    const val = weights[i] ?? '';
+    const safeId = `${ex.name.replace(/[^a-z0-9]/gi, '_')}_s${i}`;
+    return `<div class="set-col">
+      <span class="set-label">Set ${i + 1}</span>
+      <input
+        type="number"
+        inputmode="decimal"
+        class="set-input ${val !== '' ? 'has-value' : ''}"
+        id="${safeId}"
+        placeholder="—"
+        value="${val}"
+        min="0" max="999" step="0.5"
+        onchange="onWeightChange('${ex.name.replace(/'/g,"\\'")}', ${i}, this)"
+        oninput="this.classList.toggle('has-value', this.value !== '')"
+      />
+      <span class="set-unit">kg</span>
+    </div>`;
+  }).join('');
+
+  return `<li class="exercise-item">
+    <div class="exercise-top">
+      ${imgHtml}${fallback}
+      <div class="exercise-info">
+        <div class="exercise-header">
+          <span class="exercise-name">${ex.name}</span>
+          <button class="history-btn" onclick="showHistory('${ex.name.replace(/'/g,"\\'")}')">📈</button>
+        </div>
+        <div class="exercise-meta">
+          <span class="meta-badge"><span>${ex.sets}</span> sets</span>
+          <span class="meta-badge"><span>${ex.reps}</span> reps</span>
+          <span class="meta-badge">rest <span>${ex.rest}</span> min</span>
+        </div>
+      </div>
+    </div>
+    <div class="sets-row">${setsHtml}</div>
+  </li>`;
+}
+
+function onWeightChange(exerciseName, setIndex, input) {
+  const val = input.value.trim();
+  saveWeight(exerciseName, setIndex, val === '' ? '' : Number(val));
+}
+
+function render() {
+  const main = document.getElementById('main');
+  const days = programs[currentProgram].weeks[currentWeek];
+
+  const html = days.map(day => `
+    <div class="day-block">
+      <div class="day-title">${day.day}</div>
+      <ul class="exercise-list">
+        ${day.exercises.map(renderExercise).join('')}
+      </ul>
+    </div>
+  `).join('');
+
+  main.innerHTML = html;
+}
+
+// ─── HISTORY MODAL ────────────────────────────────────────────────────────────
+function maxWeight(weights) {
+  const nums = weights.map(Number).filter(n => !isNaN(n) && n > 0);
+  return nums.length ? Math.max(...nums) : null;
+}
+
+function renderChart(history) {
+  // Use best-set weight per session as the plotted value
+  const points = history
+    .map(h => ({ date: h.date, week: h.week, val: maxWeight(h.weights) }))
+    .filter(p => p.val != null);
+
+  if (points.length < 2) return '';
+
+  const W = 320, H = 110, padL = 34, padR = 12, padT = 12, padB = 24;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  const vals = points.map(p => p.val);
+  const minV = Math.min(...vals);
+  const maxV = Math.max(...vals);
+  const range = maxV - minV || 1;
+
+  const px = (i) => padL + (i / (points.length - 1)) * plotW;
+  const py = (v) => padT + (1 - (v - minV) / range) * plotH;
+
+  const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${px(i).toFixed(1)},${py(p.val).toFixed(1)}`).join(' ');
+
+  // shaded area under the line
+  const areaD = pathD + ` L${px(points.length-1).toFixed(1)},${(padT+plotH).toFixed(1)} L${padL},${(padT+plotH).toFixed(1)} Z`;
+
+  const dots = points.map((p, i) => `
+    <circle cx="${px(i).toFixed(1)}" cy="${py(p.val).toFixed(1)}" r="4" fill="#e00" stroke="#111" stroke-width="1.5">
+      <title>${formatDate(p.date)} (${p.week}): ${p.val}kg</title>
+    </circle>`).join('');
+
+  // y-axis: 3 labels
+  const ySteps = [minV, Math.round((minV + maxV) / 2), maxV];
+  const yLabels = ySteps.map(v =>
+    `<text x="${padL - 5}" y="${py(v) + 4}" text-anchor="end" font-size="9" fill="#666">${v}</text>`
+  ).join('');
+
+  // x-axis: show up to 5 date labels, evenly spaced
+  const step = Math.max(1, Math.floor(points.length / 5));
+  const xLabels = points
+    .filter((_, i) => i % step === 0 || i === points.length - 1)
+    .map((p, _, arr) => {
+      const i = points.indexOf(p);
+      const [, m, d] = p.date.split('-');
+      return `<text x="${px(i).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="9" fill="#666">${d}/${m}</text>`;
+    }).join('');
+
+  return `<div style="margin-bottom:18px;overflow:hidden">
+    <div style="font-size:0.72rem;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Best set per session (kg)</div>
+    <svg width="100%" viewBox="0 0 ${W} ${H}" style="overflow:visible">
+      <defs>
+        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#e00" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#e00" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT+plotH}" stroke="#2a2a2a" stroke-width="1"/>
+      <line x1="${padL}" y1="${padT+plotH}" x2="${padL+plotW}" y2="${padT+plotH}" stroke="#2a2a2a" stroke-width="1"/>
+      ${yLabels}
+      ${xLabels}
+      <path d="${areaD}" fill="url(#areaGrad)"/>
+      <path d="${pathD}" fill="none" stroke="#e00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      ${dots}
+    </svg>
+  </div>`;
+}
+
+function showHistory(exerciseName) {
+  const history = getHistory(exerciseName); // ascending order
+  document.getElementById('modalTitle').textContent = exerciseName;
+
+  let body = '';
+  if (!history.length) {
+    body = `<p class="modal-empty">No logs yet for this exercise.<br>Enter weights above to start tracking.</p>`;
+  } else {
+    const chart = renderChart(history);
+
+    // table newest-first
+    const rows = [...history].reverse().map(({ date, prog, week, weights }) => {
+      const chips = weights.map((w, i) =>
+        w !== '' && w != null
+          ? `<span class="set-weight-chip"><span class="chip-label">S${i+1}</span>${w}kg</span>`
+          : ''
+      ).filter(Boolean).join('');
+      return `<tr>
+        <td class="date-cell">${formatDate(date)}</td>
+        <td style="font-size:0.78rem;color:#888">${week}</td>
+        <td class="weight-cell"><div class="set-weights-list">${chips}</div></td>
+      </tr>`;
+    }).join('');
+
+    body = chart + `<table class="history-table">
+      <thead><tr><th>Date</th><th>Week</th><th>Weights</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  }
+
+  document.getElementById('modalBody').innerHTML = body;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modalOverlay')) return;
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ─── BOOT ─────────────────────────────────────────────────────────────────────
+(async () => {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+  await loadImages();
+  buildControls();
+  render();
+})();
+</script>
+</body>
+</html>

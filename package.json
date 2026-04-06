@@ -1,0 +1,11 @@
+{
+  "name": "fitness-exercise-viewer",
+  "version": "1.0.0",
+  "scripts": {
+    "fetch": "node fetch-images.js",
+    "start": "npx serve . -p 3000"
+  },
+  "dependencies": {
+    "playwright": "^1.44.0"
+  }
+}
