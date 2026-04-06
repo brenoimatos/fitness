@@ -1,12 +1,15 @@
 const CACHE_NAME = 'fitnessfaqs-v1';
 
+// Use relative paths so this works on any subdirectory (GitHub Pages, Netlify, etc.)
+const BASE = self.registration.scope;
+
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/exercises-images.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
+  BASE,
+  BASE + 'index.html',
+  BASE + 'manifest.json',
+  BASE + 'exercises-images.json',
+  BASE + 'icons/icon-192x192.png',
+  BASE + 'icons/icon-512x512.png',
 ];
 
 // Install: cache static assets

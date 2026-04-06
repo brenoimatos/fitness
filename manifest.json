@@ -2,7 +2,7 @@
   "name": "FitnessFAQs Hybrid",
   "short_name": "FFQs Hybrid",
   "description": "Hybrid workout programs: Full Body, Push/Pull/Legs, Upper/Lower",
-  "start_url": "/",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#111111",
   "theme_color": "#cc0000",
